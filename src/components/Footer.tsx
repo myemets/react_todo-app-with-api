@@ -2,59 +2,50 @@ import React from 'react';
 import { Todo } from '../types/Todo';
 import cn from 'classnames';
 import { Filter } from '../types/Filter';
+import { getActiveTodos } from '../utilities/helper';
 
 type Props = {
   todos: Todo[];
-  onFilter: React.Dispatch<React.SetStateAction<string>>;
+  onFilter: React.Dispatch<React.SetStateAction<Filter>>;
   filter: string;
-  handleDeleteAllCompleted: (currentsTodo: number[]) => void;
-};
-
-const filterOptions = {
-  [Filter.All]: { label: Filter.All, href: '#/' },
-  [Filter.Active]: { label: Filter.Active, href: '#/active' },
-  [Filter.Completed]: { label: Filter.Completed, href: '#/completed' },
+  onDelete: (postId: number) => Promise<unknown>;
 };
 
 export const Footer: React.FC<Props> = ({
   todos,
   onFilter,
   filter,
-  handleDeleteAllCompleted,
+  onDelete,
 }) => {
-  const totalItemsCount = todos.reduce(
-    (count, todo) => (todo.completed ? count : count + 1),
-    0,
-  );
-
   const hasCompletedTodos = todos
     .filter(todo => todo.completed)
     .map(todo => todo.id);
 
+  const handleDeleteAllCompleted = (todosId: number[]) => {
+    todosId.map(id => onDelete(id));
+  };
+
   return (
     <footer className="todoapp__footer" data-cy="Footer">
       <span className="todo-count" data-cy="TodosCounter">
-        {totalItemsCount} items left
+        {getActiveTodos(todos)} items left
       </span>
 
       <nav className="filter" data-cy="Filter">
-        {Object.entries(filterOptions).map(([key, { label, href }]) => {
-          const isSelected = filter === key;
-
-          return (
-            <a
-              key={key}
-              href={href}
-              className={cn('filter__link', { selected: isSelected })}
-              data-cy={`FilterLink${label}`}
-              onClick={() => onFilter(key)}
-            >
-              {label}
-            </a>
-          );
-        })}
+        {Object.values(Filter).map(value => (
+          <a
+            key={value}
+            href={`#/${value}`}
+            className={cn('filter__link', {
+              selected: filter === value,
+            })}
+            data-cy={`FilterLink${value}`}
+            onClick={() => onFilter(value)}
+          >
+            {value}
+          </a>
+        ))}
       </nav>
-
       <button
         type="button"
         className="todoapp__clear-completed"

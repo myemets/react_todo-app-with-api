@@ -1,19 +1,25 @@
 import { Todo } from '../types/Todo';
-import { TodoInfo } from './TodoInfo';
 import { TempTodo } from './TempTodo';
+import { TodoInfo } from './TodoInfo';
 
 type Props = {
   todos: Todo[];
   tempTodo: Todo | null;
-  deleteTodo: (userId: number) => void;
-  loading: number[];
+  onDelete: (postId: number) => Promise<unknown>;
+  todosInProcess: number[];
+  updateTodo: (
+    todoId: number,
+    newTitle: string,
+    completed?: boolean,
+  ) => Promise<void> | undefined;
 };
 
 export const TodoList: React.FC<Props> = ({
   todos,
-  deleteTodo,
   tempTodo,
-  loading,
+  onDelete,
+  todosInProcess,
+  updateTodo,
 }) => {
   return (
     <section className="todoapp__main" data-cy="TodoList">
@@ -21,8 +27,9 @@ export const TodoList: React.FC<Props> = ({
         <TodoInfo
           todo={todo}
           key={todo.id}
-          deleteTodo={deleteTodo}
-          loading={loading}
+          onDelete={onDelete}
+          todosInProcess={todosInProcess}
+          updateTodo={updateTodo}
         />
       ))}
       {tempTodo && <TempTodo tempTitle={tempTodo.title} />}
